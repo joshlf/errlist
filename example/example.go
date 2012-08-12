@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/joshlf13/pkg/errlist"
+	"github.com/joshlf13/errlist"
 	"os"
 	"strconv"
 )
