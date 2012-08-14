@@ -1,3 +1,7 @@
+// Copyright 2012 The Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package errlist contains a type compatible with the error interface which handles lists of
 // errors. All of the methods in this package are nil-safe; that is, calling them on nil
 // pointers is expected behavior.
