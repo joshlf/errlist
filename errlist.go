@@ -149,9 +149,12 @@ func (erl *Errlist) Err() error {
 		return nil
 	}
 	if erl.num == 1 {
-		// n := erl.hd
-		// return n.error
-		return erl.hd.error
+		// This is ugly and seemingly pointless,
+		// but doing it directly was giving me
+		// cryptic errors from other packages
+		// which imported this one.
+		n := erl.hd
+		return n.error
 	}
 	return erl
 }
