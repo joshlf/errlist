@@ -149,7 +149,7 @@ func (erl *Errlist) Err() error {
 		return nil
 	}
 	if erl.num == 1 {
-		return erl.hd.error
+		// return erl.hd.error
 	}
 	return erl
 }
