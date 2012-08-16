@@ -148,5 +148,8 @@ func (erl *Errlist) Err() error {
 	if erl == nil {
 		return nil
 	}
+	if erl.num == 1 {
+		return erl.hd.error
+	}
 	return erl
 }
