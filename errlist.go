@@ -60,7 +60,7 @@ func NewError(e error) *Errlist {
 // If e is an empty error string, do not
 // append an error. If AddString was called
 // on a nil list and with an emtpy string
-// as the argument, return a nil pointer.
+// as the argument, it returns a nil pointer.
 func (erl *Errlist) AddString(e string) *Errlist {
 	if erl == nil {
 		return NewString(e)
@@ -85,7 +85,7 @@ func (erl *Errlist) AddString(e string) *Errlist {
 // do not append an error. If
 // AddError was called on a nil
 // list and with a nil argument,
-// return a nil pointer.
+// it returns a nil pointer.
 func (erl *Errlist) AddError(e error) *Errlist {
 	if erl == nil {
 		return NewError(e)
