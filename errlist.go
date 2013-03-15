@@ -4,11 +4,19 @@
 
 // Package errlist contains a type compatible with the error interface which handles lists of
 // errors. All of the methods in this package are nil-safe; that is, calling them on nil
-// pointers is expected behavior.
+// pointers is expected behavior. errlist implements the erreq interface 
+// (github.com/joshlf13/erreq) which allows two lists to be checked for equality.
+//
+// Note that functions in this package which return Errlist pointers do not do so merely
+// as a convenience. You should not expect that calling such functions on a pointer
+// will necessarily modify the object pointed at - it may return a new pointer.
+// For example, many functions treat a nil pointer as a valid list (ie, it is possible to
+// append to a nil list).
 package errlist
 
 import (
 	"errors"
+	"github.com/joshlf13/erreq"
 )
 
 // An error type which supports lists of errors.
@@ -23,13 +31,19 @@ type errnode struct {
 	next *errnode
 }
 
+// Create a new empty error list
+// (returns nil)
+func EmptyList() *Errlist {
+	return nil
+}
+
 // Create a new error list starting with
 // an error created from e. If an empty
 // error string is provided, a nil
 // pointer is returned.
 func NewString(e string) *Errlist {
 	if e == "" {
-
+		return nil
 	}
 	var erl Errlist
 	erl.hd = &errnode{errors.New(e), nil}
@@ -74,7 +88,6 @@ func (erl *Errlist) AddString(e string) *Errlist {
 	erl.tl = ern
 	erl.num++
 	return erl
-
 }
 
 // Append e to the error list,
@@ -131,6 +144,18 @@ func (erl *Errlist) Slice() []error {
 	return esl
 }
 
+// Creates an error list whose
+// elements are the elements
+// of the argument slice.
+func FromSlice(e []error) *Errlist {
+	erl := EmptyList()
+
+	for _, v := range e {
+		erl = erl.AddError(e)
+	}
+	return erl
+}
+
 // Return the number of errors
 // in the list, or 0 if called
 // on a nil pointer.
@@ -143,7 +168,11 @@ func (erl *Errlist) Num() int {
 
 // Err returns an error equivalent 
 // to this error list. If the list 
-// is empty, Err returns nil. 
+// is empty, Err returns nil.
+// This is meant primarily for
+// checking against nil values,
+// since interface types with
+// nil values are not equal to nil.
 func (erl *Errlist) Err() error {
 	if erl == nil {
 		return nil
@@ -157,4 +186,55 @@ func (erl *Errlist) Err() error {
 		return n.error
 	}
 	return erl
+}
+
+// errlist implements the erreq interface
+// (github.com/joshlf13/erreq). Equals
+// checks for pairwise equality between
+// two lists. Equality is determined by
+// first checking to see if both elements
+// of the pair implement the erreq interface.
+// If they do, erreq.Equals is used.
+// Otherwise, pointer equality is used.
+// Lists of different length are never equal. 
+// Two nil lists are always equal. A nil list 
+// is never equal to a non-nil list.
+func (erl1 *Errlist) Equals(e erreq.Error) bool {
+	erl2, ok := e.(*Errlist)
+	if !ok {
+		return false
+	}
+
+	if erl1 == erl2 {
+		return true
+	}
+
+	// Since empty lists are always nil pointers,
+	// and since we have already checked for
+	// pointer equality, this check is now valid.
+	// Plus, we avoid nil pointer dereferences.
+	if erl1 == nil || erl2 == nil {
+		return false
+	}
+
+	if erl1.num != erl2.num {
+		return false
+	}
+
+	ern1 := erl1.hd
+	ern2 := erl2.hd
+	for ern1 != nil && ern2 != nil {
+		erreq1, ok1 := ern1.error.(erreq.Error)
+		erreq2, ok2 := ern2.error.(erreq.Error)
+
+		if (ok1 && ok2) && (!erreq1.Equals(erreq2)) {
+			return false
+		} else if ern1.error != ern2.error {
+			return false
+		}
+	}
+
+	// In case the Errlist.num field
+	// is inaccurate
+	return ern1 == ern2
 }
