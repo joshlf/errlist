@@ -232,6 +232,9 @@ func (erl1 *Errlist) Equals(e erreq.Error) bool {
 		} else if ern1.error != ern2.error {
 			return false
 		}
+
+		ern1 = ern1.next
+		ern2 = ern2.next
 	}
 
 	// In case the Errlist.num field
