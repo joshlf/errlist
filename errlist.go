@@ -151,7 +151,7 @@ func FromSlice(e []error) *Errlist {
 	erl := EmptyList()
 
 	for _, v := range e {
-		erl = erl.AddError(e)
+		erl = erl.AddError(v)
 	}
 	return erl
 }
